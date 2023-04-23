@@ -1,10 +1,12 @@
 [workspace]
 members = [
     "ow-executor",
+    "ow-executor-san",
     "ow-wasmer",
     "ow-common",
     "ow-wasmtime",
     "ow-wamr",
+    "ow-wamr-san",
     "ow-wasm-action",
     "ow-wasmtime-precompiler",
     "ow-evaluation",

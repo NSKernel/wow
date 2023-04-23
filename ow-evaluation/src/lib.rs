@@ -16,7 +16,8 @@ pub async fn init(
     file_name: String,
     capabilities: ActionCapabilities,
 ) -> anyhow::Result<()> {
-    let code = async_std::fs::read_to_string(file_name).await?;
+    println!("Entering...").await;
+    let code = String::new();
 
     let mut env = HashMap::new();
     env.insert("__OW_ACTION_NAME".to_owned(), action_name.to_owned());
@@ -31,6 +32,10 @@ pub async fn init(
             annotations: capabilities,
         },
     };
+
+    let s = String::from_utf8(serde_json::to_vec(&activation_init).expect("Could not serialize result.")).expect("fuck");
+
+    println!("{}", s).await;
 
     let body = surf::Body::from_json(&activation_init).unwrap();
     let res = surf::post(SERVER_URI.to_owned() + "/init")

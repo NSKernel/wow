@@ -1,0 +1,32 @@
+[package]
+name = "ow-executor-san"
+version = "0.1.0"
+authors = ["PhilippGackstatter <philipp.gackstatter@student.tuwien.ac.at>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "executor-san"
+path = "src/bin/executor.rs"
+
+[dependencies]
+async-std = { version = "1.6.3", features = ["unstable", "attributes"] }
+tide = "0.15.0"
+tracing = "0.1"
+tide-tracing = "0.0.7"
+async-trait = "0.1.40"
+serde_json = "1.0.57"
+serde = { version = "1.0", features = ["derive"] }
+anyhow = "1.0"
+tracing-subscriber = "0.2"
+
+ow-common = { path = "../ow-common" }
+ow-wamr-san = { path = "../ow-wamr-san", optional = true  }
+ow-wasmtime = { path = "../ow-wasmtime", optional = true  }
+ow-wasmer = { path = "../ow-wasmer", optional = true  }
+
+[features]
+wasmtime_rt = ["ow-wasmtime"]
+wasmer_rt = ["ow-wasmer"]
+wamr_rt = ["ow-wamr-san"]

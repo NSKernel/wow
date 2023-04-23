@@ -5,7 +5,6 @@ ow_wasm_action::pass_json!(func);
 ow_wasm_action::json_args!(func);
 
 #[cfg(feature = "wasm")]
-#[link(wasm_import_module = "http")]
 extern "C" {
     fn get() -> i32;
 }

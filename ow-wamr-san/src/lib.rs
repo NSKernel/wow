@@ -22,6 +22,8 @@ lazy_static::lazy_static! {
 
 static mut NATIVE_SYMBOLS: Vec<NativeSymbol> = Vec::new();
 
+use std::thread;
+
 struct WamrRuntimeState {}
 
 impl WamrRuntimeState {
@@ -29,10 +31,15 @@ impl WamrRuntimeState {
         if unsafe {enclave_setup()} != 0 {
             panic!("enclave_setup failed")
         }
+
+        // Remote Attestation
+        let new_thread = std::thread::spawn(move || {
+            unsafe {
+                run_server();
+            }
+        });
         
-        if !unsafe { wasm_runtime_init() } {
-            panic!("runtime_init failed");
-        }
+        unsafe { enclave_post_attestation(); };
 
         // Registered by WAMR-SGX runtime
         /*let native_get_symbol = NativeSymbol {
@@ -134,23 +141,13 @@ impl WasmRuntime for Wamr {
 }
 
 pub fn wamr_reset_runtime () -> Result<(), anyhow::Error> {
-    // Destroy the runtime and enclave
     unsafe {
-        wasm_runtime_destroy();
-        enclave_destroy();
-    }
-
-    // Reinitialise the enclave
-    if unsafe {enclave_setup()} != 0 {
-        panic!("enclave_setup failed")
-    }
-    
-    if !unsafe { wasm_runtime_init() } {
-        panic!("runtime_init failed");
-    }
-
-    unsafe {
-        wamr_set_http_get(get as *mut std::ffi::c_void);
+        let time = std::time::Instant::now();
+        enclave_reset();
+        println!("enclave_reset: {}ns", time.elapsed().as_nanos());
+        let time2 = std::time::Instant::now();
+        wasm_runtime_init();
+        println!("wasm_runtime_init: {}ns", time2.elapsed().as_nanos());
     }
     Ok(())
 }
@@ -200,7 +197,7 @@ pub fn wamr_run_module(
         } else {
             vec![]
         };
-	
+
         let null_ptr = 0 as *mut *const c_char;
 
         wasm_runtime_set_wasi_args(
